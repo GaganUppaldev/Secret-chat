@@ -1,43 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<html>
+    <head>
+        <title>Web chat</title>
+    </head>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <body>
+        
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+        <div>
+            <input type="text" id="input-1" />
+            <button id="genrate" onclick="convert()">Genrate username</button>
+            <p> <input type="password" type="input" type="hidden" /> </p>
+            <button>Final Submit</button>
+        </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    </body>
+
+    <script>
+      const item = document.getElementById('input-1');
+const Num = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+
+function getRandomElement(arr) {
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    return arr[randomIndex];
+}
+
+function convert() {
+    // Generate 3 random numbers
+    let randomNumbers = [];
+    for (let i = 0; i < 3; i++) {
+        randomNumbers.push(getRandomElement(Num));
+    }
+
+    // Generate 3 random letters
+    let randomLetters = [];
+    for (let i = 0; i < 3; i++) {
+        randomLetters.push(getRandomElement(letters));
+    }
+
+    // Combine numbers and letters
+
+    const combined = [ ...randomLetters,...randomNumbers].join('');
+
+    // Set the combined value to the input field
+    item.value = combined;
+}
+
+
+
+    </script>
+
 </html>
