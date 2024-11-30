@@ -1,0 +1,95 @@
+/* Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #ece9e6, #ffffff);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Main Container */
+div {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+div:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Input Styles */
+input[type="text"], input[type="password"] {
+    width: 90%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #555;
+    transition: all 0.3s ease-in-out;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #6200ea;
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.15), 0 0 5px rgba(98, 0, 234, 0.4);
+}
+
+/* Button Styles */
+button {
+    background: linear-gradient(45deg, #6200ea, #8e24aa);
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 10px 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    width: 90%;
+}
+
+button:hover {
+    background: linear-gradient(45deg, #8e24aa, #6200ea);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.98);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder Styling */
+input::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    div {
+        padding: 20px;
+    }
+
+    input[type="text"], input[type="password"], button {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+}

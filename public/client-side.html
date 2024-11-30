@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="client-side.css">
+    <title>Chat App</title>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div id="username" class="username">Guest</div>
+        </header>
+
+        <section class="friends-section">
+            <h1>Friends</h1>
+            <div class="friends-list">
+                <p id="friends-status">Zero friends you have</p>
+                <button id="add-friend-btn" class="btn">Add Friend</button>
+            </div>
+        </section>
+
+        <section class="chatbox-section">
+            <h1>Chatbox</h1>
+            <div class="chatbox">
+                <div id="chat-messages" class="messages">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="message-input" placeholder="Type a message..." class="chat-input">
+                    <button id="send-message-btn" class="btn">Send</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // JavaScript logic for dynamic functionality
+        const username = "John Doe"; // Example variable for username
+        document.getElementById("username").textContent = username;
+
+        const friendsStatus = document.getElementById("friends-status");
+        const addFriendBtn = document.getElementById("add-friend-btn");
+        const chatMessages = document.getElementById("chat-messages");
+        const messageInput = document.getElementById("message-input");
+        const sendMessageBtn = document.getElementById("send-message-btn");
+
+        addFriendBtn.addEventListener("click", () => {
+            friendsStatus.textContent = "You have 1 friend available!";
+        });
+
+        sendMessageBtn.addEventListener("click", () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                const messageElement = document.createElement("div");
+                messageElement.textContent = message;
+                messageElement.className = "message";
+                chatMessages.appendChild(messageElement);
+                messageInput.value = "";
+            }
+        });
+    </script>
+</body>
+</html>
