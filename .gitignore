@@ -22,5 +22,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-node_modules/   
+
+# Ignore node_modules across all folders
+**/node_modules/
+
+
 
