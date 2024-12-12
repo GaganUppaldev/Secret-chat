@@ -44,6 +44,31 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body; // Get username and password from request body
+
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password are required' });
+        }
+
+        const user = await User.findOne({ username }); // Find the user in the database
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (user.password === password) {
+            res.status(200).json({ success: true, message: 'Login successful' }); // Send JSON response
+        } else {
+            res.status(401).json({ success: false, message: 'Incorrect password' });
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 
 // Start the server
