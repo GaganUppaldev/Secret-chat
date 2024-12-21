@@ -1,58 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="login.css" />
-    <title>Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
-<body>
-    <div>
-        <h2>Login to your account</h2>
-        <h2>User ID</h2>
-        <input  type="text" id="input-1"/>
-        <p>
-        <h2>password</h2>
-        <input  type="password" type="text"  id="input-2"/>
-        </p>
+<html>
+    <head>
+        <title>Web chat</title>
+        <link rel="stylesheet" href="index.css">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
 
-        <button onclick="login()">LOGIN</button>
-        
-    </div>
-</body>
+    <body>
+        <div>
+            <div id="input-1">No user created yet</div>
+            <button id="generate" onclick="convert()">Generate username</button>
+            <p> 
+                <input type="password" id="input-2" /> 
+            </p>
+            <button onclick="signup()">Final Submit</button>
+        </div>
+    </body>
 
-<script>
-    function login() {
-    const username = document.getElementById("input-1").value;
-    const password = document.getElementById("input-2").value;
+    <script>
+        const item = document.getElementById('input-1');
+        const Num = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
-    alert("Your username is " + username + " and password is " + password);
-
-    axios.post('http://localhost:4000/login', {
-        username: username,
-        password: password
-    })
-    .then(response => {
-        if (response.status === 200) {
-            alert("Login successful: " + response.data.message);
+        function getRandomElement(arr) {
+            const randomIndex = Math.floor(Math.random() * arr.length);
+            return arr[randomIndex];
         }
-    })
-    .catch(error => {
-        if (error.response) {
-            // Specific error messages from the server
-            alert("Error: " + error.response.data.message);
-        } else {
-            // General network or other errors
-            alert("Failed to connect to the server.");
+
+        function convert() {
+            // Generate 3 random numbers
+            let randomNumbers = [];
+            for (let i = 0; i < 3; i++) {
+                randomNumbers.push(getRandomElement(Num));
+            }
+
+            // Generate 3 random letters
+            let randomLetters = [];
+            for (let i = 0; i < 3; i++) {
+                randomLetters.push(getRandomElement(letters));
+            }
+
+            // Combine numbers and letters
+            const combined = [...randomLetters, ...randomNumbers].join('');
+
+            // Set the combined value to the div
+            item.textContent = combined;
         }
-        console.error('Login error', error);
-    });
-}
 
+        function signup() {
+            const username = document.getElementById('input-1').textContent;
+            const password = document.getElementById('input-2').value;
 
-
-
-    
-</script>
+            // Send a POST request to the signup endpoint at localhost:4000
+            axios.post('http://localhost:4000/signup', {
+                username: username,
+                password: password
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    alert('User created');
+                }
+            })
+            .catch(error => {
+                console.error('Error creating user:', error);
+                alert('Failed to create user. Please try again.');
+            });
+        }
+    </script>
 </html>

@@ -1,0 +1,120 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.header {
+    background-color: #6200ea;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.username {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Friends Section */
+.friends-section {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.friends-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn {
+    background-color: #03dac6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #018786;
+}
+
+/* Chatbox Section */
+.chatbox-section {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chatbox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.messages {
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #e8eaf6;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #c5cae9;
+}
+
+.message {
+    background-color: #d1c4e9;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: #6200ea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .chat-input {
+        font-size: 0.9rem;
+    }
+}
