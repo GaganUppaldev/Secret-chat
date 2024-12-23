@@ -40,7 +40,10 @@
 
                 // Handle success response
                 if (response.data.success) {
+                    
                     alert(response.data.message); // Login successful
+                    const username = response.data.username; // Get username from response
+                    window.location.href = `user.html?username=${encodeURIComponent(username)}`; // Redirect with username
                 } else {
                     alert(response.data.message); // User not found or incorrect password
                 }

@@ -59,7 +59,8 @@ app.post('/login', async (req, res) => {
         }
 
         if (user.password === password) {
-            res.status(200).json({ success: true, message: 'Login successful' }); // Send JSON response
+            // Send success response with username
+            res.status(200).json({ success: true, message: 'Login successful', username: user.username });
         } else {
             res.status(401).json({ success: false, message: 'Incorrect password' });
         }
@@ -68,6 +69,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 
 

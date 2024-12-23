@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Contacts</title>
+    <link rel="stylesheet" href="user.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome, <span id="username">User</span>!</h1>
+        </header>
+        <main>
+            <section class="contact-list">
+                <h2>Your Contacts</h2>
+                <ul id="contacts">
+                    <!-- Contact items will be dynamically added here -->
+                </ul>
+            </section>
+        </main>
+    </div>
+    <script>
+        const fetchUserData = async () => {
+            try {
+                // Parse query parameters to get username
+                const queryParams = new URLSearchParams(window.location.search);
+                const username = queryParams.get('username');
+    
+                if (username) {
+                    document.getElementById('username').textContent = username; // Display username
+                } else {
+                    document.getElementById('username').textContent = 'Guest';
+                }
+    
+                // Fetch user contacts from the backend (replace with actual API)
+                const response = await fetch('/api/getUserDetails');
+                const data = await response.json();
+    
+                // Populate contacts
+                const contactsList = document.getElementById('contacts');
+                data.contacts.forEach(contact => {
+                    const li = document.createElement('li');
+                    li.className = 'contact-item';
+                    li.innerHTML = `
+                        <span>${contact.name}</span>
+                        <button class="chat-btn" onclick="startChat('${contact.id}')">Chat</button>
+                    `;
+                    contactsList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+    
+        const startChat = (contactId) => {
+            alert(`Starting chat with contact ID: ${contactId}`);
+        };
+    
+        // Call fetchUserData when the page loads
+        document.addEventListener('DOMContentLoaded', fetchUserData);
+    </script>
+    
+</body>
+</html>
