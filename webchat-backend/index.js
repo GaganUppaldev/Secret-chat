@@ -70,6 +70,36 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// POST endpoint to search for a user
+app.post('/usersearch', async (req, res) => {
+    try {
+        const { username } = req.body; // Extract username from request body
+
+        // Check if username is provided
+        if (!username) {
+            return res.status(400).json({ error: 'Username is required' });
+        }
+
+        // Search for the user in the database
+        const user = await User.findOne({ username });
+
+        if (user) {
+            // User found
+            res.status(200).json({ 
+                user: { 
+                    name: user.name, 
+                    id: user.id 
+                } 
+            });
+        } else {
+            // User not found
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        console.error('Error in /usersearch:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 
 
