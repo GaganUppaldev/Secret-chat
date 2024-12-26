@@ -4,6 +4,7 @@ const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
 const app = express();
 const port = 4000;
+const axios = require('axios');
 
 // Enable CORS for localhost:4000
 app.use(cors({
@@ -98,6 +99,39 @@ app.post('/usersearch', async (req, res) => {
     } catch (err) {
         console.error('Error in /usersearch:', err);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/adduser', async (req, res) => {
+    axios.post('http://localhost:4000/adduser', { 
+        loggedInUsername,
+        userName 
+    })
+
+    try {
+        console.log('Add user request received:', req.body);
+
+        const loggedInUser = await User.findOne({ username: loggedInUsername });
+        if (!loggedInUser) {
+            return res.status(404).json({ message: 'Logged-in user not found.' });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(userName)) {
+            return res.status(400).json({ message: 'Invalid user ID.' });
+        }
+
+        if (loggedInUser.contacts.includes(userName)) {
+            return res.status(400).json({ message: 'User is already in your contacts.' });
+        }
+
+        loggedInUser.contacts.push(userName);
+        await loggedInUser.save();
+
+        console.log('User successfully added to contacts:', userName);
+        res.status(200).json({ message: 'User added to contacts.' });
+    } catch (error) {
+        console.error('Error adding user to contacts:', error.message);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 

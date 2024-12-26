@@ -30,7 +30,6 @@
     <script>
         const fetchUserData = async () => {
             try {
-                // Parse query parameters to get username
                 const queryParams = new URLSearchParams(window.location.search);
                 const username = queryParams.get('username');
     
@@ -40,18 +39,16 @@
                     document.getElementById('username').textContent = 'Guest';
                 }
     
-                // Fetch user contacts from the backend (replace with actual API)
                 const response = await fetch('/api/getUserDetails');
                 const data = await response.json();
     
-                // Populate contacts
                 const contactsList = document.getElementById('contacts');
                 data.contacts.forEach(contact => {
                     const li = document.createElement('li');
                     li.className = 'contact-item';
                     li.innerHTML = `
                         <span>${contact.name}</span>
-                        <button class="chat-btn" onclick="startChat('${contact.id}')">Chat</button>
+                        <button class="chat-btn" onclick="startChat('${contact.name}')">Chat</button>
                     `;
                     contactsList.appendChild(li);
                 });
@@ -60,45 +57,70 @@
             }
         };
     
-        const startChat = (contactId) => {
-            alert(`Starting chat with contact ID: ${contactId}`);
+        const startChat = (contactName) => {
+            alert(`Starting chat with contact: ${contactName}`);
         };
     
-        // Call fetchUserData when the page loads
-        document.addEventListener('DOMContentLoaded', fetchUserData);
-
-        // Search user
         function search() {
             const username = document.getElementById("input-box").value;
+            const searchResult = document.getElementById("search-result");
+            searchResult.innerHTML = "Searching..."; // Loading indicator
+    
+            axios.post('http://localhost:4000/usersearch', { username })
+                .then(response => {
+                    if (response.status === 200 && response.data.user) {
+                        const user = response.data.user;
+                        console.log('Found user:', user); // Debug log
+                        searchResult.innerHTML = `
+                            <div>
+                                <p>User found: ${user.name}</p>
+                                <button onclick="addUser('${user.name}')">Add</button>
+                            </div>
+                        `;
+                    } else {
+                        searchResult.innerHTML = '<p>User not found.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error in finding user:', error);
+                    searchResult.innerHTML = '<p>Failed to find user. Please try again.</p>';
+                });
+        }
+    
+        function addUser(userName) {
+            const loggedInUsername = document.getElementById("username").textContent;
 
-            axios.post('http://localhost:4000/usersearch', {
-                username: username,
+            if (loggedInUsername === 'Guest') {
+                alert('You must be logged in to add contacts.');
+                return;
+            }
+
+            if (!userName) {
+                alert('Invalid username. Please try again.');
+                return;
+            }
+
+            axios.post('http://localhost:4000/adduser', { 
+                loggedInUsername,
+                userName 
             })
             .then(response => {
-                if (response.status === 200 && response.data.user) {
-                    const user = response.data.user;
-                    const searchResult = document.getElementById("search-result");
-                    searchResult.innerHTML = `
-                        <div>
-                            <p>User found: ${user.name}</p>
-                            <button onclick="addUser('${user.id}')">Add</button>
-                        </div>
-                    `;
+                if (response.status === 200) {
+                    alert('User added to your contacts.');
                 } else {
-                    alert('User not found.');
+                    alert('Failed to add user.');
                 }
             })
             .catch(error => {
-                console.error('Error in finding user:', error);
-                alert('Failed to find user. Please try again.');
+                console.error('Error adding user:', error);
+                alert('Failed to add user. Please try again.');
             });
         }
 
-        // Add user
-        function addUser(userId) {
-            alert(`User with ID: ${userId} has been added to your contacts.`);
-        }
+        document.addEventListener('DOMContentLoaded', fetchUserData);
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </body>
 </html>
 
