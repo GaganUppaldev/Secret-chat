@@ -4,7 +4,7 @@ const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
 const app = express();
 const port = 4000;
-const axios = require('axios');
+//const axios = require('axios');
 
 // Enable CORS for localhost:4000
 app.use(cors({
@@ -88,7 +88,7 @@ app.post('/usersearch', async (req, res) => {
             // User found
             res.status(200).json({ 
                 user: { 
-                    name: user.name, 
+                    name: username,  //user.name to username
                     id: user.id 
                 } 
             });
@@ -102,33 +102,46 @@ app.post('/usersearch', async (req, res) => {
     }
 });
 
+// Add User to Contacts API
 app.post('/adduser', async (req, res) => {
-    axios.post('http://localhost:4000/adduser', { 
-        loggedInUsername,
-        userName 
-    })
-
     try {
-        console.log('Add user request received:', req.body);
+        const { loggedInUsername, userIdToAdd } = req.body;
 
+        console.log('Add user request received:', { loggedInUsername, userIdToAdd });
+
+        // Validate input
+        if (!loggedInUsername || !userIdToAdd) {
+            return res.status(400).json({ message: 'Both loggedInUsername and userIdToAdd are required.' });
+        }
+
+        // Find the logged-in user in the database
         const loggedInUser = await User.findOne({ username: loggedInUsername });
         if (!loggedInUser) {
             return res.status(404).json({ message: 'Logged-in user not found.' });
         }
 
-        if (!mongoose.Types.ObjectId.isValid(userName)) {
-            return res.status(400).json({ message: 'Invalid user ID.' });
+        // Validate that the provided `userIdToAdd` is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userIdToAdd)) {
+            return res.status(400).json({ message: 'Invalid user ID provided.' });
         }
 
-        if (loggedInUser.contacts.includes(userName)) {
+        // Check if the user to be added exists
+        const userToAdd = await User.findById(userIdToAdd);
+        if (!userToAdd) {
+            return res.status(404).json({ message: 'User to be added not found.' });
+        }
+
+        // Check if the user is already in contacts
+        if (loggedInUser.contacts.includes(userIdToAdd)) {
             return res.status(400).json({ message: 'User is already in your contacts.' });
         }
 
-        loggedInUser.contacts.push(userName);
+        // Add the user's ObjectId to the logged-in user's contacts
+        loggedInUser.contacts.push(userIdToAdd);
         await loggedInUser.save();
 
-        console.log('User successfully added to contacts:', userName);
-        res.status(200).json({ message: 'User added to contacts.' });
+        console.log('User successfully added to contacts:', userToAdd.username);
+        res.status(200).json({ message: 'User added to contacts.', contactId: userIdToAdd });
     } catch (error) {
         console.error('Error adding user to contacts:', error.message);
         res.status(500).json({ message: 'Internal server error.' });
