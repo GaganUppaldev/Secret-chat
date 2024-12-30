@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Welcome, <span id="username">User</span>!</h1>
+            <h1>Welcome, <span id="username">Guest</span>!</h1> 
         </header>
         <div>
             <div id="input">
@@ -127,8 +127,68 @@
                 });
         };
 
+        window.onload = function() {
+    // Set a timer after the page has fully loaded
+    setTimeout(() => {
+        const user1 = document.getElementById("username").textContent;
+        axios.post('http://localhost:4000/contacts', { user1 })
+
+        .then(response => {
+    if (response.status === 200) {
+
+
+        console.log("pass" + response.data.usernames);
+        alert("your contacts are : " + response.data.usernames);
+         
+        const contact_list_of_user = response.data.usernames;
+        
+
+        document.getElementById("contacts").textContent = contact_list_of_user;
+
+        /*// Clear previous list items (if any)
+        contactsList.innerHTML = '';
+
+        // Loop through contacts and add each to the list with a Chat button
+        response.data.contacts.forEach(contact => {
+            const listItem = document.createElement('li'); // Create list item
+            listItem.textContent = contact; // Set contact name
+
+            // Create the Chat button
+            const chatButton = document.createElement('button');
+            chatButton.textContent = '  Chat  '; // Button text
+            chatButton.onclick = function() {
+                // Add functionality for the chat button (open chat, etc.)
+                alert('Starting chat with ' + contact);
+            };
+
+            // Append the Chat button to the list item
+            listItem.appendChild(chatButton);
+
+            // Append the list item to the contacts list
+            contactsList.appendChild(listItem);
+        });*/
+    }
+})
+.catch(error => {
+    console.error('Error contacts', error);
+});
+
+
+      
+
+    
+        
+       
+
+
+    }, 3000); // Change 3000 to the desired delay in milliseconds (3 seconds here)
+};
+
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', fetchUserData);
+        alert(" welcome " + user1 );
     </script>
 </body>
 </html>
+    

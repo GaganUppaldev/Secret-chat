@@ -67,3 +67,14 @@ main {
 .chat-btn:hover {
     background-color: #3700b3;
 }
+
+
+#contacts li {
+    margin-bottom: 10px; 
+}
+
+
+#contacts button {
+    padding: 10px 15px; 
+    margin-left: 10px; 
+}

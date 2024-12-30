@@ -2,9 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
+const bodyParser = require('body-parser');
+
 const app = express();
 const port = 4000;
-//const axios = require('axios');
+
+
+app.use(bodyParser.json());
 
 // Enable CORS for localhost:4000
 app.use(cors({
@@ -102,51 +106,51 @@ app.post('/usersearch', async (req, res) => {
     }
 });
 
-// Add User to Contacts API
-app.post('/adduser', async (req, res) => {
+// Contacts Endpoint
+app.post('/contacts', async (req, res) => {
     try {
-        const { loggedInUsername, userIdToAdd } = req.body;
+        const { user1 } = req.body; // Changed from loggedInUsername to username
 
-        console.log('Add user request received:', { loggedInUsername, userIdToAdd });
+        console.log("Request received from:", { user1  }); // Updated here
 
         // Validate input
-        if (!loggedInUsername || !userIdToAdd) {
-            return res.status(400).json({ message: 'Both loggedInUsername and userIdToAdd are required.' });
+        if (!user1) { // Updated here
+            return res.status(400).json({
+                message: "We are unable to get your username for some reason. Please try again.",
+            });
         }
 
-        // Find the logged-in user in the database
-        const loggedInUser = await User.findOne({ username: loggedInUsername });
+        // Find the logged-in user
+        const loggedInUser = await User.findOne({ username : user1 }); // Updated here
         if (!loggedInUser) {
-            return res.status(404).json({ message: 'Logged-in user not found.' });
+            return res.status(404).json({ message: "User not found. Please try again." });
         }
 
-        // Validate that the provided `userIdToAdd` is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(userIdToAdd)) {
-            return res.status(400).json({ message: 'Invalid user ID provided.' });
+        // Check if the user has contacts
+        if (loggedInUser.contacts && loggedInUser.contacts.length > 0) {
+            // Fetch usernames of all contacts
+            const contacts = await User.find({ _id: { $in: loggedInUser.contacts } })
+                .select('username -_id') // Fetch only the username field
+                .lean(); // Convert Mongoose documents to plain objects
+
+            const usernames = contacts.map(contact => contact.username);
+            console.log("Contact Usernames:", usernames);
+
+            //return res.status(200).json({ usernames: usernames }); 
+            console.log("Returning Usernames:", usernames);
+            return res.status(200).json({ usernames: usernames });
+            
+
+        } else {
+            console.log("No contacts found for the logged-in user.");
+            return res.status(200).json({ message: "No contacts found." });
         }
-
-        // Check if the user to be added exists
-        const userToAdd = await User.findById(userIdToAdd);
-        if (!userToAdd) {
-            return res.status(404).json({ message: 'User to be added not found.' });
-        }
-
-        // Check if the user is already in contacts
-        if (loggedInUser.contacts.includes(userIdToAdd)) {
-            return res.status(400).json({ message: 'User is already in your contacts.' });
-        }
-
-        // Add the user's ObjectId to the logged-in user's contacts
-        loggedInUser.contacts.push(userIdToAdd);
-        await loggedInUser.save();
-
-        console.log('User successfully added to contacts:', userToAdd.username);
-        res.status(200).json({ message: 'User added to contacts.', contactId: userIdToAdd });
     } catch (error) {
-        console.error('Error adding user to contacts:', error.message);
-        res.status(500).json({ message: 'Internal server error.' });
+        console.error("Error fetching contacts:", error.message);
+        res.status(500).json({ message: "Internal server error." });
     }
 });
+
 
 
 
