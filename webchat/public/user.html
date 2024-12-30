@@ -134,40 +134,42 @@
         axios.post('http://localhost:4000/contacts', { user1 })
 
         .then(response => {
-    if (response.status === 200) {
+            if (response.status === 200) {
+    console.log("pass" + response.data.usernames);
+    alert("your contacts are : " + response.data.usernames);
+
+    const contact_list_of_user = response.data.usernames;
+
+    // Clear previous list items (if any)
+    const contacts = document.getElementById("contacts");
+    contacts.innerHTML = '';
+
+    // Loop through contacts and add each to the list with a Chat button
+    contact_list_of_user.forEach(contact => {
+        const listItem = document.createElement('li'); // Create list item
+        listItem.textContent = contact; // Set contact name
+
+        // Create the Chat button
+        const chatButton = document.createElement('button');
+        chatButton.textContent = 'Chat'; // Button text
+        chatButton.onclick = function () {
+            // Add functionality for the chat button (open chat, etc.)
+            alert('Starting chat with ' + contact);
+            window.location.href = `chat.html?contact=${encodeURIComponent(contact)}`;
 
 
-        console.log("pass" + response.data.usernames);
-        alert("your contacts are : " + response.data.usernames);
-         
-        const contact_list_of_user = response.data.usernames;
-        
+        };
 
-        document.getElementById("contacts").textContent = contact_list_of_user;
+        // Append the Chat button to the list item
+        listItem.appendChild(chatButton);
 
-        /*// Clear previous list items (if any)
-        contactsList.innerHTML = '';
+        // Append the list item to the contacts list
+        contacts.appendChild(listItem);
+    });
+}
 
-        // Loop through contacts and add each to the list with a Chat button
-        response.data.contacts.forEach(contact => {
-            const listItem = document.createElement('li'); // Create list item
-            listItem.textContent = contact; // Set contact name
-
-            // Create the Chat button
-            const chatButton = document.createElement('button');
-            chatButton.textContent = '  Chat  '; // Button text
-            chatButton.onclick = function() {
-                // Add functionality for the chat button (open chat, etc.)
-                alert('Starting chat with ' + contact);
-            };
-
-            // Append the Chat button to the list item
-            listItem.appendChild(chatButton);
-
-            // Append the list item to the contacts list
-            contactsList.appendChild(listItem);
-        });*/
-    }
+    
+    
 })
 .catch(error => {
     console.error('Error contacts', error);
