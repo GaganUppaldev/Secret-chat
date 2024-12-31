@@ -27,7 +27,7 @@
         <!-- Chat Window -->
         <div class="chat-window">
             <div class="chat-header">
-                <h3 id="chat-title">Chat with User</h3>
+                <h3  id="contact-id">Chat with User</h3>
             </div>
 
             <div class="chat-messages" id="chat-messages">
@@ -44,13 +44,13 @@
     <script>
         // Get the query parameter for 'contact'
         const queryParams = new URLSearchParams(window.location.search);
-        const contact = queryParams.get('contacts'); // Using 'contacts' as per the query parameter
+        const contact = queryParams.get('contact'); //minor typo issue in last commit solved
 
         // Display the username or default to 'Guest'
         if (contact) {
-            document.getElementById('username').textContent = contact; // Display contact
+            document.getElementById('contact-id').textContent = "Chat with  " + contact ; 
         } else {
-            document.getElementById('username').textContent = 'Guest';
+            document.getElementById('contact-id').textContent = 'Error';
         }
 
         const chatMessages = document.getElementById('chat-messages');
