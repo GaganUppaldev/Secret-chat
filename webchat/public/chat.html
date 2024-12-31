@@ -3,10 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSecret-chat</title>
+    <title>Professional Chat</title>
+    <link rel="stylesheet" href="chat.css">
 </head>
 <body>
-    <h1>WELCOME TO CHATS</h1>
-    
+    <div class="chat-container">
+        <!-- Sidebar for Profile and Contacts -->
+        <div class="sidebar">
+            <div class="profile-section">
+                <img src="profile-pic.jpg" alt="Profile Picture" class="profile-pic">
+                <h1>Welcome, <span id="username"></span>!</h1>
+                <p class="user-status">Online</p>
+            </div>
+
+            <div class="contacts-section">
+                <h3>Contacts</h3>
+                <ul id="contacts">
+                    <!-- Dynamic contact list will be populated here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-window">
+            <div class="chat-header">
+                <h3 id="chat-title">Chat with User</h3>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <!-- Chat messages will be displayed here -->
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the query parameter for 'contact'
+        const queryParams = new URLSearchParams(window.location.search);
+        const contact = queryParams.get('contacts'); // Using 'contacts' as per the query parameter
+
+        // Display the username or default to 'Guest'
+        if (contact) {
+            document.getElementById('username').textContent = contact; // Display contact
+        } else {
+            document.getElementById('username').textContent = 'Guest';
+        }
+
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Function to append messages
+        function appendMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+        }
+
+        // Event listener for the send button
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                appendMessage('sender', message); // Sender's message
+                messageInput.value = ''; // Clear the input field
+
+                // Simulate receiving a reply
+                setTimeout(() => {
+                    appendMessage('receiver', `Reply: ${message}`); // Receiver's reply
+                }, 1000);
+            }
+        });
+    </script>
 </body>
 </html>
