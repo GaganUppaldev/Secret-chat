@@ -69,6 +69,7 @@
         // Event listener for the send button
         sendButton.addEventListener('click', () => {
             const message = messageInput.value.trim();
+            alert("sending message to" + contact);
             if (message) {
                 appendMessage('sender', message); // Sender's message
                 messageInput.value = ''; // Clear the input field

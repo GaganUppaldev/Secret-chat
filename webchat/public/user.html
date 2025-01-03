@@ -155,7 +155,9 @@
         chatButton.onclick = function () {
             // Add functionality for the chat button (open chat, etc.)
             alert('Starting chat with ' + contact);
-            window.location.href = `chat.html?contact=${encodeURIComponent(contact)}`;
+            const name = document.getElementById("username").textContent;
+            window.location.href = `chat.html?contact=${encodeURIComponent(contact)}&username=${encodeURIComponent(name)}`;
+
 
 
         };
