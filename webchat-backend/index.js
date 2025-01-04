@@ -106,7 +106,6 @@ app.post('/usersearch', async (req, res) => {
     }
 });
 
-// Contacts Endpoint
 app.post('/contacts', async (req, res) => {
     try {
         const { user1 } = req.body; // Changed from loggedInUsername to username
@@ -150,6 +149,8 @@ app.post('/contacts', async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
     }
 });
+
+
 
 
 

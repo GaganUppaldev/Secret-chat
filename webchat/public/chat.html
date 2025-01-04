@@ -53,6 +53,15 @@
             document.getElementById('contact-id').textContent = 'Error';
         }
 
+        const username  = queryParams.get('username'); //minor typo issue in last commit solved
+
+        // Display the username or default to 'Guest'
+        if (username) {
+            document.getElementById('username').textContent =  username ; 
+        } else {
+            document.getElementById('username').textContent = 'Error';
+        }
+
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -68,17 +77,15 @@
 
         // Event listener for the send button
         sendButton.addEventListener('click', () => {
-            const message = messageInput.value.trim();
-            alert("sending message to" + contact);
-            if (message) {
-                appendMessage('sender', message); // Sender's message
-                messageInput.value = ''; // Clear the input field
+            console.log("you are  " + username + "  sending message to  " + contact);
+            alert("you are  " + username + "  sending message to  " + contact);
 
-                // Simulate receiving a reply
-                setTimeout(() => {
-                    appendMessage('receiver', `Reply: ${message}`); // Receiver's reply
-                }, 1000);
-            }
+            const sender =  document.getElementById("username").textContent;
+            const receiver = contact;
+
+            alert("test 2 " + sender + " AND "+ receiver);
+
+
         });
     </script>
 </body>
