@@ -76,17 +76,28 @@
         }
 
         // Event listener for the send button
-        sendButton.addEventListener('click', () => {
-            console.log("you are  " + username + "  sending message to  " + contact);
-            alert("you are  " + username + "  sending message to  " + contact);
+sendButton.addEventListener('click', () => {
+    const messageText = messageInput.value; // Get the input value
 
-            const sender =  document.getElementById("username").textContent;
-            const receiver = contact;
+    if (messageText.trim() === '') {
+        alert('Please enter a message before sending!');
+        return;
+    }
 
-            alert("test 2 " + sender + " AND "+ receiver);
+    // Show the input value in an alert
+    alert("Message: " + messageText);
 
+    console.log("You are " + username + " sending message to " + contact);
+    alert("You are " + username + " sending message to " + contact);
 
-        });
+    const sender = document.getElementById("username").textContent;
+    const receiver = contact;
+
+    alert("Sender: " + sender + " | Receiver: " + receiver);
+
+    // Clear the input field after sending
+    messageInput.value = '';
+});
     </script>
 </body>
 </html>
