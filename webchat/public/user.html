@@ -100,7 +100,9 @@
 
         // Add a user to the logged-in user's contacts
         const addUser = (userIdToAdd ) => {
+            alert(userIdToAdd);
             const loggedInUsername = document.getElementById("username").textContent;
+            
 
             if (loggedInUsername === 'Guest') {
                 alert('You must be logged in to add contacts.');

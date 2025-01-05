@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
 const bodyParser = require('body-parser');
+const Message = require('./Message');
 
 const app = express();
 const port = 4000;
@@ -75,6 +76,46 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.post('/adduser', async (req, res) => {
+    const { loggedInUsername, userIdToAdd } = req.body;
+
+    // Input validation
+    if (!loggedInUsername) {
+        return res.status(400).json({ message: "LOGIN USERNAME ISSUE" });
+    }
+
+    if (!userIdToAdd) {
+        return res.status(400).json({ message: "OBJECT ID MISSING" });
+    }
+
+    try {
+        // Check if logged-in user exists
+        const loggedInUser = await User.findOne({ username: loggedInUsername });
+        if (!loggedInUser) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        // Check if the user to add exists
+        const contactUser = await User.findById(userIdToAdd);
+        if (!contactUser) {
+            return res.status(400).json({ message: "Contact user not found" });
+        }
+
+        // Ensure the contact is not already in the logged-in user's contacts list
+        if (!loggedInUser.contacts.includes(contactUser._id)) {
+            loggedInUser.contacts.push(contactUser._id);
+            await loggedInUser.save();
+            return res.status(200).json({ message: "User added to your contacts" });
+        } else {
+            return res.status(400).json({ message: "User is already in your contacts" });
+        }
+
+    } catch (err) {
+        console.error('Error in /adduser:', err);
+        return res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // POST endpoint to search for a user
 app.post('/usersearch', async (req, res) => {
     try {
@@ -106,6 +147,7 @@ app.post('/usersearch', async (req, res) => {
     }
 });
 
+//contacts endpoint
 app.post('/contacts', async (req, res) => {
     try {
         const { user1 } = req.body; // Changed from loggedInUsername to username
@@ -151,6 +193,161 @@ app.post('/contacts', async (req, res) => {
 });
 
 
+/*app.post('/chat-add', async (req, res) => {
+    const { sender, receiver, messageText } = req.body;
+
+    if (!sender) {
+        return res.status(400).json({ message: "We can't find who is sender" });
+    }
+
+    if (!receiver) {
+        return res.status(400).json({ message: "We can't find who is receiver" });
+    }
+
+    if (!messageText) {
+        return res.status(400).json({ message: "We are unable to spot any kind of message written by you" });
+    }
+
+    /*const addMessage = async (sender, receiver, messageText) => {
+        try {
+            // Check if a message document already exists between the sender and receiver
+            const existingMessage = await Message.findOne({ sender, receiver });
+    
+            if (existingMessage) {
+                // If a message document exists, add a new message to the 'content' array
+                existingMessage.content.push({ messageText, timestamp: new Date() });
+    
+                await existingMessage.save();
+                console.log("Message added to existing conversation");
+            } else {
+                // If no message document exists, create a new one
+                const newMessage = new Message({
+                    sender,
+                    receiver,
+                    content: [{ messageText, timestamp: new Date() }],
+                });
+    
+                await newMessage.save();
+                console.log("New message conversation started");
+            }
+        } catch (error) {
+            console.error("Error saving message:", error.message);
+        }
+    };
+    
+
+    
+
+    if (sender || receiver) {
+        const agent = await Message.findOne({ sender: sender, receiver: receiver });
+        if (/*sender || receiver agent) {
+            try {
+
+                agent.content.push({ messageText });
+                await agent.save();
+                console.log("New message pushed")
+
+                /*
+                const add = new Message({ sender, receiver, content: messageText }); //here was an error
+            
+                await add.save();
+                console.log("YOUR MESSAGE IS SAVED SIR");
+                return res.status(200).json({ message: "Message is SENT" });
+            } catch (error) {
+                console.error("Error saving message:", error.message);
+                return res.status(500).json({ message: "Internal server error." });
+            }
+        }
+        if (!agent /*!sender || recevier) {
+            try {
+                const add_database = new Message({ sender, receiver, messageText });
+                await add_database.save();
+                return res.status(200).json({ message: "Your message is sent SIR" });
+            } catch (error) {
+                console.error("Error saving message:", error.message);
+                return res.status(500).json({ message: "Internal server error." });
+            }
+        } else {
+            console.log("ERROR IS OUT OF CONTEXT FROM THIS API SIR");
+            return res.status(400).json({ message: "ERROR IS OUT OF CONTEXT FROM THIS API SIR" });
+        }
+    }
+});
+
+
+
+*/
+
+
+app.post('/chat-add', async (req, res) => {
+    const { sender, receiver, messageText } = req.body;
+
+    // Check if sender and receiver exist
+    if (sender && receiver) {
+        try {
+            // Try to find a message conversation between sender and receiver
+            const agent = await Message.findOne({ sender: sender, receiver: receiver });
+
+            if (agent) {
+                // If conversation exists, push the new message to the content array
+                agent.content.push({ messageText });
+                await agent.save();
+                console.log("New message pushed");
+
+                return res.status(200).json({ message: "Message added to existing conversation" });
+            } else {
+                // If no conversation exists, create a new one
+                const newMessage = new Message({
+                    sender: sender,
+                    receiver: receiver,
+                    content: [{ messageText }]  // Store the message in an array of objects
+                });
+                await newMessage.save();
+                console.log("New message conversation created");
+
+                return res.status(200).json({ message: "New conversation created and message sent" });
+            }
+        } catch (error) {
+            console.error("Error saving message:", error.message);
+            return res.status(500).json({ message: "Internal server error." });
+        }
+    } else {
+        console.log("Sender or receiver not provided");
+        return res.status(400).json({ message: "Sender or receiver is missing" });
+    }
+});
+
+
+app.get('/chat-history', async (req, res) => {
+    const { sender, receiver } = req.query;
+
+    // Validate sender and receiver are provided
+    if (!sender || !receiver) {
+        return res.status(400).json({ message: "Sender and receiver must be provided" });
+    }
+
+    try {
+        // Fetch the message conversation between sender and receiver, or receiver and sender
+        const agent = await Message.findOne({
+            $or: [
+                { sender: sender, receiver: receiver },
+                { sender: receiver, receiver: sender }
+            ]
+        });
+
+        if (!agent) {
+            return res.status(404).json({ message: "No conversation found between the sender and receiver" });
+        }
+
+        // Return the messages (content array)
+        return res.status(200).json({ messages: agent.content });
+    } catch (error) {
+        console.error("Error fetching messages:", error.message);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+
 
 
 
@@ -159,5 +356,3 @@ app.post('/contacts', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
-
-
