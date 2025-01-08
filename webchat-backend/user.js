@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
 
     contacts: [{
          type: mongoose.Schema.Types.ObjectId, ref: 'User' ,
-         chatid : {type :string}
+         chatid : {type :String}
     }
         //{ type: mongoose.Schema.Types.ObjectId, ref: 'User' } 
         
