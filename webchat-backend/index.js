@@ -285,36 +285,34 @@ app.post('/chat-add', async (req, res) => {
     // Check if sender and receiver exist
     if (sender && receiver) {
         try {
-            // Try to find a message conversation between sender and receiver
-            const agent = await Message.findOne({ sender: sender, receiver: receiver });
-
+            // Find the sender
+            const agent = await User.findOne({ username: sender });
             if (agent) {
-                // If conversation exists, push the new message to the content array
-                agent.content.push({ messageText });
-                await agent.save();
-                console.log("New message pushed");
-
-                return res.status(200).json({ message: "Message added to existing conversation" });
+                const id_A = agent._id;
+                console.log("object id sender" + id_A);
             } else {
-                // If no conversation exists, create a new one
-                const newMessage = new Message({
-                    sender: sender,
-                    receiver: receiver,
-                    content: [{ messageText }]  // Store the message in an array of objects
-                });
-                await newMessage.save();
-                console.log("New message conversation created");
-
-                return res.status(200).json({ message: "New conversation created and message sent" });
+                return res.status(400).json({ message: "Invalid sender username." });
             }
+    
+            // Find the receiver
+            const agent_2 = await User.findOne({ username: receiver });
+            if (agent_2) {
+                const id_B = agent_2._id; 
+                console.log("object id sender" + id_B);
+            } else {
+                return res.status(400).json({ message: "Receiver username not found on the server." });
+            }
+
+    
         } catch (error) {
-            console.error("Error saving message:", error.message);
+            
+            console.error(error);
             return res.status(500).json({ message: "Internal server error." });
         }
     } else {
-        console.log("Sender or receiver not provided");
-        return res.status(400).json({ message: "Sender or receiver is missing" });
+        return res.status(400).json({ message: "Sender and receiver are required." });
     }
+    
 });
 
 
