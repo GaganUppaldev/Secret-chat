@@ -6,11 +6,9 @@ const userSchema = new mongoose.Schema({
 
     contacts: [{
          type: mongoose.Schema.Types.ObjectId, ref: 'User' ,
-         chatid : {type :String}
-    }
-        //{ type: mongoose.Schema.Types.ObjectId, ref: 'User' } 
-        
-    ]
+         chatid : mongoose.Schema.Types.ObjectId //converted from strng to mongoose object id
+    }]
+        //{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 const User = mongoose.model('User', userSchema);
