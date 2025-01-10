@@ -4,6 +4,7 @@ const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
 const bodyParser = require('body-parser');
 const Message = require('./Message');
+const {ObjectId} = require('mongodb');
 
 const app = express();
 const port = 4000;
@@ -134,7 +135,7 @@ app.post('/usersearch', async (req, res) => {
             res.status(200).json({ 
                 user: { 
                     name: username,  //user.name to username
-                    id: user.id 
+                    id: user._id //object id of user
                 } 
             });
         } else {
@@ -278,58 +279,61 @@ app.post('/contacts', async (req, res) => {
 
 */
 
-
 app.post('/chat-add', async (req, res) => {
     const { sender, receiver, messageText } = req.body;
 
     if (sender && receiver) {
         try {
-            // Find the sender
+            // Find sender
             const agent = await User.findOne({ username: sender });
             if (!agent) {
                 return res.status(400).json({ message: "Invalid sender username." });
             }
             const id_A = agent._id;
-            console.log("Sender ObjectId:", id_A);
 
-            const senderContacts = agent.contacts; // Sender's contacts array
-            console.log("Sender's Contacts:", senderContacts);
-
-            // Find the receiver
+            // Find receiver
             const agent_2 = await User.findOne({ username: receiver });
             if (!agent_2) {
                 return res.status(400).json({ message: "Receiver username not found on the server." });
             }
             const id_B = agent_2._id;
-            console.log("Receiver ObjectId:", id_B);
 
-            // Check if receiver is already in sender's contacts
-            const contact = senderContacts.find(
-                //contact => contact.type.toString() === id_B.toString()
-                contact => contact?.type?.toString() === id_B.toString()
+            // Check if receiver is in sender's contacts
+            const contact = agent.contacts.find(
+                contact => contact?.userId?.toString() === id_B.toString()
             );
 
             if (contact && contact.chatid) {
-                console.log("Chat ID exists, we can push messageText into it.");
-                // Logic to push messageText into the existing chat
+                const existingChat = await Message.findById(contact.chatid);
+                if (existingChat) {
+                    existingChat.content.push({ messageText, timestamp: new Date() });
+                    await existingChat.save();
+                    return res.status(200).json({ message: "Message added to existing chat." });
+                } else {
+                    return res.status(400).json({ message: "Chat ID not found in database." });
+                }
             } else {
-                console.log("No chat ID found, creating a new chat.");
-                // Create a new chatId and update both sender and receiver contacts
+                // Create new chat
+                const newChat = await Message.create({
+                    sender,
+                    receiver,
+                    content: [{ messageText, timestamp: new Date() }]
+                });
 
-                /*
-                const newChatId = new mongoose.Types.ObjectId();
+                if (!newChat) {
+                    return res.status(500).json({ message: "Failed to create new chat." });
+                }
 
                 // Update sender's contacts
-                agent.contacts.push({ type: id_B, chatid: newChatId });
+                agent.contacts.push({ userId: id_B, chatid: newChat._id });//in UserID i am sending recevviers's id
                 await agent.save();
 
                 // Update receiver's contacts
-                agent_2.contacts.push({ type: id_A, chatid: newChatId });
+                agent_2.contacts.push({ userId: id_A, chatid: newChat._id });
                 await agent_2.save();
 
-                console.log("New chat ID created and updated for both users:", newChatId);*/
+                return res.status(200).json({ message: "New chat created and updated in contacts." });
             }
-
         } catch (error) {
             console.error("Error:", error);
             return res.status(500).json({ message: "Internal server error." });
@@ -338,6 +342,9 @@ app.post('/chat-add', async (req, res) => {
         return res.status(400).json({ message: "Sender and receiver are required." });
     }
 });
+
+
+
 
 
 
