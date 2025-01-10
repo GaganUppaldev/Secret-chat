@@ -149,49 +149,47 @@ app.post('/usersearch', async (req, res) => {
 });
 
 //contacts endpoint
+
 app.post('/contacts', async (req, res) => {
     try {
-        const { user1 } = req.body; // Changed from loggedInUsername to username
+        const { user1 } = req.body; // Extract username from the request body
 
-        console.log("Request received from:", { user1  }); // Updated here
-
-        // Validate input
-        if (!user1) { // Updated here
-            return res.status(400).json({
-                message: "We are unable to get your username for some reason. Please try again.",
-            });
+        if (!user1) {
+            return res.status(400).json({ message: "Username is required." });
         }
 
-        // Find the logged-in user
-        const loggedInUser = await User.findOne({ username : user1 }); // Updated here
+        const loggedInUser = await User.findOne({ username: user1 });
+
         if (!loggedInUser) {
-            return res.status(404).json({ message: "User not found. Please try again." });
+            return res.status(404).json({ message: "User not found." });
         }
 
-        // Check if the user has contacts
-        if (loggedInUser.contacts && loggedInUser.contacts.length > 0) {
-            // Fetch usernames of all contacts
-            const contacts = await User.find({ _id: { $in: loggedInUser.contacts } })
-                .select('username -_id') // Fetch only the username field
-                .lean(); // Convert Mongoose documents to plain objects
+        if (loggedInUser.contacts.length > 0) {
+            // Extract user IDs from the contacts array
+            const userIds = loggedInUser.contacts.map(contact => contact.userId);
 
-            const usernames = contacts.map(contact => contact.username);
-            console.log("Contact Usernames:", usernames);
+            try {
+                // Fetch usernames of all contacts
+                const contacts = await User.find({ _id: { $in: userIds } })
+                    .select('username -_id') // Fetch only the `username` field
+                    .lean(); // Convert Mongoose documents to plain objects
 
-            //return res.status(200).json({ usernames: usernames }); 
-            console.log("Returning Usernames:", usernames);
-            return res.status(200).json({ usernames: usernames });
-            
-
+                const usernames = contacts.map(contact => contact.username);
+                return res.status(200).json({ usernames });
+            } catch (error) {
+                console.error(`Error fetching contacts for user ${loggedInUser._id}:`, error.message);
+                return res.status(500).json({ message: "Error fetching contacts." });
+            }
         } else {
-            console.log("No contacts found for the logged-in user.");
             return res.status(200).json({ message: "No contacts found." });
         }
     } catch (error) {
-        console.error("Error fetching contacts:", error.message);
-        res.status(500).json({ message: "Internal server error." });
+        console.error('Error in /contacts:', error);
+        return res.status(500).json({ message: "Internal server error." });
     }
 });
+
+
 
 
 /*app.post('/chat-add', async (req, res) => {
