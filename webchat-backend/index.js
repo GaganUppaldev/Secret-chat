@@ -339,40 +339,85 @@ app.post('/chat-add', async (req, res) => {
     } else {
         return res.status(400).json({ message: "Sender and receiver are required." });
     }
-});
+});  
 
-
-
-
-
-
-
-app.get('/chat-history', async (req, res) => {
-    const { sender, receiver } = req.query;
+app.post('/chat-history', async (req, res) => {
+    const { sender, receiver } = req.body;
 
     // Validate sender and receiver are provided
     if (!sender || !receiver) {
-        return res.status(400).json({ message: "Sender and receiver must be provided" });
+        return res.status(400).json({
+            success: false,
+            message: "Sender and receiver must be provided."
+        });
     }
 
     try {
-        // Fetch the message conversation between sender and receiver, or receiver and sender
-        const agent = await Message.findOne({
-            $or: [
-                { sender: sender, receiver: receiver },
-                { sender: receiver, receiver: sender }
-            ]
-        });
+        // Fetch sender and receiver from the database
+        const senderUser = await User.findOne({ username: sender });
+        const receiverUser = await User.findOne({ username: receiver });
 
-        if (!agent) {
-            return res.status(404).json({ message: "No conversation found between the sender and receiver" });
+        if (!senderUser) {
+            return res.status(404).json({
+                success: false,
+                message: `Sender "${sender}" not found.`
+            });
+        }
+        if (!receiverUser) {
+            return res.status(404).json({
+                success: false,
+                message: `Receiver "${receiver}" not found.`
+            });
         }
 
-        // Return the messages (content array)
-        return res.status(200).json({ messages: agent.content });
+        const receiverId = receiverUser._id;
+
+        // Find the chat details in sender's contacts
+        const contact = senderUser.contacts.find(contact =>
+            contact?.userId?.toString() === receiverId.toString()
+        );
+
+        if (!contact) {
+            return res.status(404).json({
+                success: false,
+                message: "No chat found between the specified users."
+            });
+        }
+
+        // Retrieve the chat messages using the chat ID
+        const chatHistory = await Message.findById(contact.chatid);
+
+        if (!chatHistory) {
+            return res.status(404).json({
+                success: false,
+                message: "No messages found for the given chat ID."
+            });
+        }
+
+        // Extract and format the messages
+        const messages = chatHistory.content.map(entry => ({
+            messageText: entry.messageText,
+            timestamp: entry.timestamp
+        }));
+
+        // Respond with the chat history
+        return res.status(200).json({
+            success: true,
+            message: "Chat history retrieved successfully.",
+            chat: {
+                sender: chatHistory.sender,
+                receiver: chatHistory.receiver,
+                messages // Corrected format
+            },
+        });
+
     } catch (error) {
-        console.error("Error fetching messages:", error.message);
-        return res.status(500).json({ message: "Internal server error." });
+        console.error("Error retrieving chat history:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while retrieving chat history.",
+            error: error.message
+        });
     }
 });
 

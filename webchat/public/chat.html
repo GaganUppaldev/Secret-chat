@@ -69,19 +69,23 @@
 
         // Function to fetch chat history
         function fetchChatHistory(sender, receiver) {
-            axios.get(`http://localhost:4000/chat-history?sender=${sender}&receiver=${receiver}`)
-                .then(response => {
-                    if (response.status === 200) {
-                        const messages = response.data.messages;
-                        chatMessages.innerHTML = ''; // Clear existing messages
-                        messages.forEach(msg => appendMessage(sender, msg.messageText));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching messages:', error);
-                    alert('Failed to fetch messages. Please try again.');
-                });
-        }
+    axios.post('http://localhost:4000/chat-history', {
+        sender, // Using function arguments
+        receiver
+    })
+        .then(response => {
+            if (response.status === 200) {
+                const messages = response.data.chat.messages; // Access the correct data field
+                chatMessages.innerHTML = ''; // Clear existing messages
+                messages.forEach(msg => appendMessage(sender, msg.messageText));
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
+            alert('Failed to fetch messages. Please try again.');
+        });
+}
+
 
         // Event listener for the send button
         sendButton.addEventListener('click', () => {
