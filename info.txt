@@ -1,2 +1,13 @@
 I have spotted major issue with logic of the web app so now it will take time to correct logic than code it agian 
 #using a new approch to manage and get chats in clint side.
+
+Now main chat portion is working :
+*users can sign up and create account
+*users can login
+*users can add people to contacts
+*users can chat with contacts properly
+
+Next features that i will now work to add:
+*providing info who sent message to whom in client side 
+*Using websockets for fast chating
+
