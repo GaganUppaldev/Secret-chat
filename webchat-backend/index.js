@@ -279,7 +279,7 @@ app.post('/contacts', async (req, res) => {
 
 app.post('/chat-add', async (req, res) => {
     const { sender, receiver, messageText } = req.body;
-
+    //# Need to req body of one more varibale named sender1 to add it in sender1 : data schema with messageText
     if (sender && receiver) {
         try {
             // Find sender
