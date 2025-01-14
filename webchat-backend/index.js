@@ -304,7 +304,7 @@ app.post('/chat-add', async (req, res) => {
             if (contact && contact.chatid) {
                 const existingChat = await Message.findById(contact.chatid);
                 if (existingChat) {
-                    existingChat.content.push({ messageText, timestamp: new Date() });
+                    existingChat.content.push({ messageText, timestamp: new Date() , sender1: sender});//added variable to add
                     await existingChat.save();
                     return res.status(200).json({ message: "Message added to existing chat." });
                 } else {
@@ -323,7 +323,7 @@ app.post('/chat-add', async (req, res) => {
                 }
 
                 // Update sender's contacts
-                agent.contacts.push({ userId: id_B, chatid: newChat._id });//in UserID i am sending recevviers's id
+                agent.contacts.push({ userId: id_B, chatid: newChat._id  });//in UserID i am sending recevviers's id
                 await agent.save();
 
                 // Update receiver's contacts

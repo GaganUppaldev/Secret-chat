@@ -30,8 +30,8 @@ const messageSchema = new mongoose.Schema({
     receiver: { type: String, required: true },
     content: [{
         messageText: { type: String, required: true },
-        timestamp: { type: Date, default: Date.now }
-        //Need to define sender 1 here
+        timestamp: { type: Date, default: Date.now },
+        sender1:{type : String } //defined sender1 in database now
     }],
     timestamp: { type: Date, default: Date.now }
 });
