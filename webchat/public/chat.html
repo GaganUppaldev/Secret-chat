@@ -59,10 +59,16 @@
         const sendButton = document.getElementById('send-button');
 
         // Function to append messages
-        function appendMessage(sender, message) {
+        function appendMessage(sender, message ,sender1) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender);
-            messageElement.textContent = message;
+            if(sender1 == undefined){
+                messageElement.textContent = message;
+            }else{
+                messageElement.textContent = sender1 + " : " + message;
+
+            }
+            
             chatMessages.appendChild(messageElement);
             chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
         }
@@ -77,7 +83,7 @@
             if (response.status === 200) {
                 const messages = response.data.chat.messages; // Access the correct data field
                 chatMessages.innerHTML = ''; // Clear existing messages
-                messages.forEach(msg => appendMessage(sender, msg.messageText));
+                messages.forEach(msg => appendMessage(sender, msg.messageText , msg.sender1)); //recived here
             }
         })
         .catch(error => {
@@ -125,7 +131,7 @@
         // Fetch initial chat history when page loads
         if (username && contact) {
             fetchChatHistory(username, contact);
-        }
+        } 
     </script>
 </body>
 </html>

@@ -395,9 +395,10 @@ app.post('/chat-history', async (req, res) => {
         }
 
         // Extract and format the messages
-        const messages = chatHistory.content.map(entry => ({
+        const messages = chatHistory.content.map(entry => ({  
             messageText: entry.messageText,
-            timestamp: entry.timestamp
+            timestamp: entry.timestamp,
+            sender1 : entry.sender1
         }));
 
         // Respond with the chat history
