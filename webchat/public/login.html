@@ -20,39 +20,64 @@
 
     <!-- Import Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        // Add event listener for button click
+    
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+
+    <script type="module">
+        /*import starter from './websockets.js';*/
+
+        const socket = io("http://localhost:4000");
+    
         document.getElementById('submit-btn').addEventListener('click', async () => {
+
+            
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-
+    
             if (!username || !password) {
                 alert('Username and password are required');
                 return;
             }
-
+    
             try {
-                // Send POST request to the backend
                 const response = await axios.post('http://localhost:4000/login', {
                     username,
-                    password
+                    password,
                 });
-
-                // Handle success response
+    
                 if (response.data.success) {
+                    alert(response.data.message);
+                    /*const ws =  await starter (); // Use the starter function
+                    if(ws){
+                        alert("connection is active")
+                    }else{
+                        alert("not worked")
+                    }
+                    //ws.emit("message", "WebSocket is working!");
+                    //ws.on('message', (message) => console.log(`Received: ${message}`));*/
                     
-                    alert(response.data.message); // Login successful
-                    const username = response.data.username; // Get username from response
-                    window.location.href = `user.html?username=${encodeURIComponent(username)}`; // Redirect with username
+                    socket.on("connect", () => console.log("Server is connected"));
+                    socket.on("message", (message) => console.log(message));
+                    socket.on("disconnect", () => console.log("Server Disconnected"));
+                    window.location.href = `user.html?username=${encodeURIComponent(response.data.username)}`;
                 } else {
-                    alert(response.data.message); // User not found or incorrect password
+                    alert(response.data.message);
                 }
             } catch (error) {
-                // Handle error response
                 console.error('Error during login:', error);
                 alert('An error occurred during login. Please try again later.');
             }
+
         });
+
+        
+        /*// Socket events
+        socket.on("connect", () => console.log("Connected to the server"));
+        socket.on("message", (message) => console.log(`Message from server: ${message}`));
+        socket.on("disconnect", () => console.log("Disconnected from the server"));*/
     </script>
+    
 </body>
 </html>

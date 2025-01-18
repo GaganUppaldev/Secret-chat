@@ -1,20 +1,22 @@
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Import the CORS middleware
 const User = require('./user'); // Import User schema
 const bodyParser = require('body-parser');
 const Message = require('./Message');
-const {ObjectId} = require('mongodb');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 const port = 4000;
 
-
 app.use(bodyParser.json());
 
-// Enable CORS for localhost:4000
+// Enable CORS for localhost:3000
 app.use(cors({
-    origin: 'http://localhost:3000', // Allow requests only from localhost:4000
+    origin: 'http://localhost:3000', // Allow requests only from localhost:3000
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
     credentials: true // Enable cookies if needed
 }));
@@ -29,7 +31,33 @@ mongoose.connect('mongodb://localhost:27017/webchat', {
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
-// Home route
+// Create HTTP server for WebSocket and Express
+const httpServer = createServer(app);
+
+// Set up WebSocket server
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+    },
+});
+
+io.on('connection', (socket) => {
+    console.log("Client is connected");
+
+    // Handle client disconnection
+    socket.on('disconnect', () => console.log("Client Disconnected"));
+
+    // Handle incoming messages
+    socket.on("message", (data) => {
+        console.log(`Message from client: ${data}`);
+
+        // Broadcast message to all connected clients
+        io.emit('message', data);
+    });
+});
+
+// Define Home route
 app.get('/', (req, res) => {
     res.send('Welcome to the WebChat API!');
 });
@@ -428,6 +456,6 @@ app.post('/chat-history', async (req, res) => {
 
 
 // Start the server
-app.listen(port, () => {
+httpServer.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
