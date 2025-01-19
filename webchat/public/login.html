@@ -27,7 +27,7 @@
     <script type="module">
         /*import starter from './websockets.js';*/
 
-        const socket = io("http://localhost:4000");
+       /* const socket = io("http://localhost:4000");*/
     
         document.getElementById('submit-btn').addEventListener('click', async () => {
 
@@ -58,9 +58,9 @@
                     //ws.emit("message", "WebSocket is working!");
                     //ws.on('message', (message) => console.log(`Received: ${message}`));*/
                     
-                    socket.on("connect", () => console.log("Server is connected"));
+                    /*socket.on("connect", () => console.log("Server is connected"));
                     socket.on("message", (message) => console.log(message));
-                    socket.on("disconnect", () => console.log("Server Disconnected"));
+                    socket.on("disconnect", () => console.log("Server Disconnected"));*/
                     window.location.href = `user.html?username=${encodeURIComponent(response.data.username)}`;
                 } else {
                     alert(response.data.message);

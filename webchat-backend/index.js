@@ -45,8 +45,27 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
     console.log("Client is connected");
 
+    const user = null;
+
+    //getting username:
+    socket.on("AccountID" , (S_user) => {
+         user = S_user
+        console.log("Recived username : " , user);
+    })
+
+    /*if(S_user){
+        const present = S_user;
+    }*/
+
     // Handle client disconnection
-    socket.on('disconnect', () => console.log("Client Disconnected"));
+    socket.on('disconnect'  , () => {
+        if(user){
+            console.log("disccnnected" + user);
+        }
+        
+    })
+
+    //});
 
     // Handle incoming messages
     socket.on("message", (data) => {

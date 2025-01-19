@@ -41,8 +41,14 @@
             </div>
         </div>
     </div>
+    
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 
     <script>
+
+        
+
         // Get the query parameter for 'contact' and 'username'
         const queryParams = new URLSearchParams(window.location.search);
         const contact = queryParams.get('contact');
@@ -132,6 +138,19 @@
         if (username && contact) {
             fetchChatHistory(username, contact);
         } 
+
+        //websockets connection
+
+        const socket = io("http://localhost:4000");
+        socket.on("connect", () => console.log("Server is connected"));
+        const S_user = document.getElementById("username").textContent;
+        socket.emit("AccountID" , S_user); //sending username id to server
+        console.log(S_user);
+        socket.on("message", (message) => console.log(message));
+        socket.on("disconnect", () => {
+        //socket.emit("Accountinfo" , S_user);
+        console.log("Server Disconnected")});
+                   
     </script>
 </body>
 </html>
