@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const Message = require('./Message');
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const Activeuser = require("./Activeuser");
 
 const app = express();
 const port = 4000;
@@ -45,36 +46,54 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
     console.log("Client is connected");
 
-    const user = null;
+    let user = null;
 
-    //getting username:
-    socket.on("AccountID" , (S_user) => {
-         user = S_user
-        console.log("Recived username : " , user);
-    })
+    socket.on("AccountID", async (S_user) => {
+        user = S_user;
+        console.log("Received username:", user);
 
-    /*if(S_user){
-        const present = S_user;
-    }*/
-
-    // Handle client disconnection
-    socket.on('disconnect'  , () => {
-        if(user){
-            console.log("disccnnected" + user);
+        try {
+            const agent = await Activeuser.findOne({ username: user });
+            if (!agent) {
+                const newAgent = new Activeuser({ username: user });
+                await newAgent.save();
+                console.log("User added to database:", user);
+            } else {
+                console.log("User already exists in the database:", user);
+            }
+        } catch (err) {
+            console.error("Error adding user to the database:", err);
         }
-        
-    })
+    });
+
+    socket.on('disconnect', async () => {
+        if (user) {
+            console.log("Disconnected user:", user);
+            try {
+                const deleteResult = await Activeuser.deleteOne({ username: user });
+                if (deleteResult.deletedCount > 0) {
+                    console.log("User deleted from database:", user);
+                } else {
+                    console.log("User not found in the database:", user);
+                }
+            } catch (err) {
+                console.error("Error handling disconnection:", err);
+            }
+        }
+    });
+});
+    
 
     //});
 
     // Handle incoming messages
-    socket.on("message", (data) => {
+    /*socket.on("message", (data) => {
         console.log(`Message from client: ${data}`);
 
         // Broadcast message to all connected clients
         io.emit('message', data);
-    });
-});
+    });*/
+
 
 // Define Home route
 app.get('/', (req, res) => {

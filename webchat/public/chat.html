@@ -114,6 +114,15 @@
             // Send the message to the backend
             //#sender1 is just userid of message sender , to spot who is sending
             //#Need to put sender in sender 1 variable and send to /chat-add
+
+
+            //To verify is reciver active? if active than we will send message with websockets;
+            axios.post('http://localhost:4000/verify_activeuser' , {
+                receiver : receiver ,
+            })
+                
+
+            
             
             axios.post('http://localhost:4000/chat-add', {
                 sender: sender,
@@ -148,8 +157,9 @@
         console.log(S_user);
         socket.on("message", (message) => console.log(message));
         socket.on("disconnect", () => {
-        //socket.emit("Accountinfo" , S_user);
-        console.log("Server Disconnected")});
+            socket.emit("Accountinfo", user);
+            console.log("Server Disconnected");
+        });
                    
     </script>
 </body>
