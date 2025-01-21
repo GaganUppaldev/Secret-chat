@@ -2,14 +2,22 @@ I have spotted major issue with logic of the web app so now it will take time to
 #using a new approch to manage and get chats in clint side.
 
 Now main chat portion is working :
+
 *users can sign up and create account
 *users can login
 *users can add people to contacts
 *users can chat with contacts properly
+*providing info who sent message to whom in client side 
+
+*websockets are working as follow : 
+When user login and than goes to contact section than websockets connection establish between client
+and server , after it user goes to database which is for active user.
+when user leave chat page than websockets connection disconnect and at same got deleted from database
+  
+
 
 Next features that i will now work to add:
-*providing info who sent message to whom in client side 
-*Using websockets for fast chating
+
 
 
 
