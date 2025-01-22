@@ -120,11 +120,15 @@
             axios.post('http://localhost:4000/verify_activeuser' , {
                 receiver : receiver ,
             })
-                
-
-            
-            
-            axios.post('http://localhost:4000/chat-add', {
+            .then(response => {
+                if(response.status == 200){
+                    //websockets will start from here ( !!! Working will start from here !!!)
+                    //const socket = io("http://localhost:4000");
+                    //socket.on("data");
+                    R_user = document.getElementById("contact-id").textContent;
+                    socket.emit("message" , {S_user , R_user , messageText})
+                }else{
+                    axios.post('http://localhost:4000/chat-add', {
                 sender: sender,
                 receiver: receiver,
                 messageText: messageText
@@ -141,6 +145,30 @@
                 console.error('Error sending message:', error);
                 alert('Failed to send message. Please try again.');
             });
+                }
+
+            })
+                
+
+            
+            
+            /*axios.post('http://localhost:4000/chat-add', {
+                sender: sender,
+                receiver: receiver,
+                messageText: messageText
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    appendMessage(sender, messageText); // Append message in chat
+                    messageInput.value = ''; // Clear the input field
+                    fetchChatHistory(sender, receiver); // Refresh chat history
+                    alert(response.data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            });*/
         });
 
         // Fetch initial chat history when page loads

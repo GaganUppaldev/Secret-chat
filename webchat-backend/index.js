@@ -66,6 +66,27 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('message', (data) => {
+        try {
+          const {S_user , R_user , messageText} = data /*JSON.parse(data);*/
+          console.log('Data received:');
+          console.log(`Sender: ${S_user}`);
+          console.log(`Receiver: ${ R_user}`);
+          console.log(`Message: ${messageText}`);
+    
+          
+    
+          // Example: You can now process this data or send it to other connected clients.
+        } catch (error) {
+          console.error('Error parsing message:', error);
+        }
+      });
+    
+      socket.on('close', () => {
+        console.log('Client disconnected');
+      });
+    
+
     socket.on('disconnect', async () => {
         if (user) {
             console.log("Disconnected user:", user);
@@ -485,6 +506,25 @@ app.post('/chat-history', async (req, res) => {
             message: "An error occurred while retrieving chat history.",
             error: error.message
         });
+    }
+});
+
+app.post("/verify_activeuser", async (req, res) => {
+    const { receiver } = req.body;
+
+    try {
+        const agent = await Activeuser.findOne({ username: receiver });
+        if (!agent) {
+            console.log("No active user, so use RESTful API");
+            return res.status(402).json({ message: "No active user found." });
+        }
+        if (agent) {
+            console.log("Active user, so use WebSockets API");
+            return res.status(200).json({ message: "Active user found." });
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Internal server error." });
     }
 });
 
