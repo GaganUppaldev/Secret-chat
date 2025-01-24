@@ -73,6 +73,11 @@ io.on('connection', (socket) => {
           console.log(`Sender: ${S_user}`);
           console.log(`Receiver: ${ R_user}`);
           console.log(`Message: ${messageText}`);
+
+          /*const agent =  User.findone({username : S_user});
+          if(user){
+            const agent2 = User
+          }*/
     
           
     
