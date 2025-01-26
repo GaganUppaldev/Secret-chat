@@ -21,6 +21,9 @@ and add messages to database .
 now just small part of code is left to send message through websockets to database , till now we can only 
 see in terminal 
 
+#Reason of delay ?
+A little bit of task is left but the reason is that i am working on my own website link is give below .
+
   
 
 
