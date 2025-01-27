@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
     socket.on('message', async (data) => {
         try {
             const { S_user, R_user, messageText } = data;
-            console.log('Data received:');
+            console.log('Data received:'); //just kept here to check
             console.log(`Sender: ${S_user}`);
             console.log(`Receiver: ${R_user}`);
             console.log(`Message: ${messageText}`);
