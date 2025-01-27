@@ -66,26 +66,67 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('message', (data) => {
+    socket.on('message', async (data) => {
         try {
-          const {S_user , R_user , messageText} = data /*JSON.parse(data);*/
-          console.log('Data received:');
-          console.log(`Sender: ${S_user}`);
-          console.log(`Receiver: ${ R_user}`);
-          console.log(`Message: ${messageText}`);
-
-          /*const agent =  User.findone({username : S_user});
-          if(user){
-            const agent2 = User
-          }*/
+            const { S_user, R_user, messageText } = data;
+            console.log('Data received:');
+            console.log(`Sender: ${S_user}`);
+            console.log(`Receiver: ${R_user}`);
+            console.log(`Message: ${messageText}`);
     
-          
+            const agent = await User.findOne({ username: S_user });
+            if (!agent) {
+                return res.status(402).json({ message: "We are not able to find your user id from our database" });
+            }
     
-          // Example: You can now process this data or send it to other connected clients.
+            const S_id = agent.id;
+    
+            const agent0 = await User.findOne({ username: R_user });
+            if (!agent0) {
+                return res.status(402).json({ message: "We are not able to find your contact in our database" });
+            }
+            const R_id = agent0.id;
+    
+            // Find Receiver's id in the chat_id section of User's contacts (sender's contacts)
+            const contact = agent.contacts.find(contact => contact.S_id.toString() === R_id.toString());
+    
+            if (contact && contact.chatid) {
+                const existingChat = await Message.findById(contact.chatid);
+                if (existingChat) {
+                    existingChat.content.push({ messageText, timestamp: new Date(), sender: S_user });
+                    await existingChat.save();
+                    return res.status(200).json({ message: "Message added to existing chat." });
+                } else {
+                    return res.status(400).json({ message: "Chat ID not found in database." });
+                }
+            } else {
+                // Create new chat
+                const newChat = await Message.create({
+                    sender: S_user,
+                    receiver: R_user,
+                    content: [{ messageText, timestamp: new Date() }]
+                });
+    
+                if (!newChat) {
+                    return res.status(500).json({ message: "Failed to create new chat." });
+                }
+    
+                // Update sender's contacts
+                agent.contacts.push({ userId: R_id, chatid: newChat._id });
+                await agent.save();
+    
+                // Update receiver's contacts
+                agent0.contacts.push({ userId: S_id, chatid: newChat._id });
+                await agent0.save();
+    
+                return res.status(200).json({ message: "New chat created and updated in contacts." });
+            }
         } catch (error) {
-          console.error('Error parsing message:', error);
+            console.error('Error parsing message:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
         }
-      });
+    });
+    
     
       socket.on('close', () => {
         console.log('Client disconnected');
