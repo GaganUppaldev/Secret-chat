@@ -35,3 +35,5 @@ Next features that i will now work to add:
 
 #just extra info :
 Today i worked on own pdf site project so i don't contributed here you can visit my site at :https://www.pdfconverttool.com/
+
+project is done auth issue in git 
