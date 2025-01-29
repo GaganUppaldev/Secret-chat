@@ -69,63 +69,73 @@ io.on('connection', (socket) => {
     socket.on('message', async (data) => {
         try {
             const { S_user, R_user, messageText } = data;
-            console.log('Data received:'); //just kept here to check
+    
+            console.log('Data received:'); // For debugging
             console.log(`Sender: ${S_user}`);
             console.log(`Receiver: ${R_user}`);
             console.log(`Message: ${messageText}`);
     
             const agent = await User.findOne({ username: S_user });
             if (!agent) {
-                return res.status(402).json({ message: "We are not able to find your user id from our database" });
+                // Emit an error response to the sender
+                console.log("No username")
+                return socket.emit('error', { message: "We are not able to find your user ID in our database." });
+                
             }
     
             const S_id = agent.id;
     
             const agent0 = await User.findOne({ username: R_user });
             if (!agent0) {
-                return res.status(402).json({ message: "We are not able to find your contact in our database" });
+                // Emit an error response to the sender
+                console.log("No recevier name means agent0")
+                return socket.emit('error', { message: "We are not able to find your contact in our database." });
             }
             const R_id = agent0.id;
     
-            // Find Receiver's id in the chat_id section of User's contacts (sender's contacts)
-            const contact = agent.contacts.find(contact => contact.S_id.toString() === R_id.toString());
+            // Find Receiver's ID in the chat_id section of User's contacts (sender's contacts)
+            const contact = agent.contacts.find(contact => contact?.userId?.toString() === R_id.toString());
+            //fixed issue  above ?
     
             if (contact && contact.chatid) {
                 const existingChat = await Message.findById(contact.chatid);
                 if (existingChat) {
+                    console.log("chat is presnt pushing text")
                     existingChat.content.push({ messageText, timestamp: new Date(), sender: S_user });
                     await existingChat.save();
-                    return res.status(200).json({ message: "Message added to existing chat." });
+                    console.log('Message added to existing chat:', existingChat);
+                    return socket.emit('success', { message: "Message added to existing chat." });
                 } else {
-                    return res.status(400).json({ message: "Chat ID not found in database." });
+                    console.error('Chat ID not found in database:', contact.chatid);
+                    console.log("No chat ID avilable")
+                    return socket.emit('error', { message: "Chat ID not found in database." });
                 }
             } else {
-                // Create new chat
                 const newChat = await Message.create({
                     sender: S_user,
                     receiver: R_user,
-                    content: [{ messageText, timestamp: new Date() }]
+                    content: [{ messageText, timestamp: new Date(), sender: S_user }]
                 });
-    
-                if (!newChat) {
-                    return res.status(500).json({ message: "Failed to create new chat." });
-                }
-    
-                // Update sender's contacts
+                console.log('New chat created:', newChat);
+            
                 agent.contacts.push({ userId: R_id, chatid: newChat._id });
                 await agent.save();
-    
-                // Update receiver's contacts
+            
                 agent0.contacts.push({ userId: S_id, chatid: newChat._id });
                 await agent0.save();
-    
-                return res.status(200).json({ message: "New chat created and updated in contacts." });
+            
+                console.log('Contacts updated for both users');
+                return socket.emit('success', { message: "New chat created and updated in contacts." });
             }
+            
         } catch (error) {
             console.error('Error parsing message:', error);
-            return res.status(500).json({ message: 'Internal Server Error' });
+            // Emit a generic error response
+            console.log("error in creating new chat")
+            socket.emit('error', { message: 'Internal Server Error' });
         }
     });
+    
     
     
       socket.on('close', () => {
@@ -149,6 +159,8 @@ io.on('connection', (socket) => {
         }
     });
 });
+
+
     
 
     //});
@@ -411,21 +423,27 @@ app.post('/contacts', async (req, res) => {
 */
 
 app.post('/chat-add', async (req, res) => {
+    console.log("one request came ")
     const { sender, receiver, messageText } = req.body;
     //# Need to req body of one more varibale named sender1 to add it in sender1 : data schema with messageText
     if (sender && receiver) {
         try {
             // Find sender
+            console.log("Finding started in /chat-add")
             const agent = await User.findOne({ username: sender });
             if (!agent) {
+                console.log("SENDER NOT FOUND")
                 return res.status(400).json({ message: "Invalid sender username." });
+               
             }
             const id_A = agent._id;
 
             // Find receiver
             const agent_2 = await User.findOne({ username: receiver });
             if (!agent_2) {
+                console.log("RECEVIER NOT FOUNDED")
                 return res.status(400).json({ message: "Receiver username not found on the server." });
+            
             }
             const id_B = agent_2._id;
 
@@ -440,7 +458,9 @@ app.post('/chat-add', async (req, res) => {
                     existingChat.content.push({ messageText, timestamp: new Date() , sender1: sender});//added variable to add
                     await existingChat.save();
                     return res.status(200).json({ message: "Message added to existing chat." });
+                    
                 } else {
+                    console.log("Message failed to added")
                     return res.status(400).json({ message: "Chat ID not found in database." });
                 }
             } else {
@@ -452,6 +472,7 @@ app.post('/chat-add', async (req, res) => {
                 });
 
                 if (!newChat) {
+                    console.log("failed to create new chat")
                     return res.status(500).json({ message: "Failed to create new chat." });
                 }
 
@@ -467,9 +488,11 @@ app.post('/chat-add', async (req, res) => {
             }
         } catch (error) {
             console.error("Error:", error);
+            console.log("catch error")
             return res.status(500).json({ message: "Internal server error." });
         }
     } else {
+        console.log("Out of box , not found this")
         return res.status(400).json({ message: "Sender and receiver are required." });
     }
 });  
@@ -555,24 +578,31 @@ app.post('/chat-history', async (req, res) => {
     }
 });
 
+//!FIX ISSUE!
+//Need to fix issue in this endpoint /verify_activeuser , it is sending 402 error not not finding user , need proper error handling;
+//fixed api endpoint 
+
 app.post("/verify_activeuser", async (req, res) => {
     const { receiver } = req.body;
 
     try {
         const agent = await Activeuser.findOne({ username: receiver });
-        if (!agent) {
-            console.log("No active user, so use RESTful API");
-            return res.status(402).json({ message: "No active user found." });
-        }
+
         if (agent) {
             console.log("Active user, so use WebSockets API");
             return res.status(200).json({ message: "Active user found." });
-        }
+        } 
+
+        console.log("No active user, so use RESTful API");
+        return res.status(404).json({ message: "No active user found." });
+
     } catch (error) {
         console.error("Error:", error);
         return res.status(500).json({ message: "Internal server error." });
     }
 });
+
+
 
 
 

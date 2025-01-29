@@ -28,7 +28,7 @@
         <!-- Chat Window -->
         <div class="chat-window">
             <div class="chat-header">
-                <h3 id="contact-id">Chat with User</h3>
+                <h3 id="contact-id"> </h3>
             </div>
 
             <div class="chat-messages" id="chat-messages">
@@ -58,7 +58,7 @@
         document.getElementById('username').textContent = username || 'Guest';
         
         // Display the contact name
-        document.getElementById('contact-id').textContent = contact ? `Chat with ${contact}` : 'Error';
+        document.getElementById('contact-id').textContent = contact ? `${contact}` : 'Error';
 
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
@@ -101,39 +101,79 @@
 
         // Event listener for the send button
         sendButton.addEventListener('click', () => {
-            const messageText = messageInput.value; // Get the input value
+    const messageText = messageInput.value.trim(); // Trim to remove unnecessary spaces
 
-            if (messageText.trim() === '') {
-                alert('Please enter a message before sending!');
-                return;
-            }
+    if (messageText === '') {
+        alert('Please enter a message before sending!');
+        return;
+    }
 
-            const sender = username; // The sender username
-            const receiver = contact; // The receiver username
+    const sender = username;  // Sender's username
+    const receiver = contact; // Receiver's username
 
-            // Send the message to the backend
-            //#sender1 is just userid of message sender , to spot who is sending
-            //#Need to put sender in sender 1 variable and send to /chat-add
+    // Verify if the receiver is active
+    axios.post('http://localhost:4000/verify_activeuser', { receiver })
+    .then(response => {
+        if (response.status === 200) {
+            // WebSockets will start from here ( !!! Working will start from here !!! )
+            const R_user = document.getElementById("contact-id").textContent;
+            socket.emit("message", { S_user: sender, R_user: receiver , messageText: messageText });//issue was not definig variables happened due to mismanagement of code
+            
+            // Append message immediately for active users
+            appendMessage(sender, messageText);
+            messageInput.value = ''; // Clear input field
+            fetchChatHistory(sender, receiver); // Refresh chat history
 
+            // Emit 'success' event via WebSockets
+            socket.emit('success', { message: "Message added to existing chat." });
 
-            //To verify is reciver active? if active than we will send message with websockets;
-            axios.post('http://localhost:4000/verify_activeuser' , {
-                receiver : receiver ,
-            })
-            .then(response => {
-                if(response.status == 200){
-                    //websockets will start from here ( !!! Working will start from here !!!)
-                    //const socket = io("http://localhost:4000");
-                    //socket.on("data");
-                    R_user = document.getElementById("contact-id").textContent;
-                    socket.emit("message" , {S_user , R_user , messageText})
-                }else{
-                    axios.post('http://localhost:4000/chat-add', {
+            return null; // Prevent further `.then()` execution
+
+        } /*else*/ 
+        if (response.status === 404) {
+            // If receiver is inactive, proceed with normal message storage
+            return axios.post('http://localhost:4000/chat-add', {
                 sender: sender,
                 receiver: receiver,
                 messageText: messageText
-            })
-            .then(response => {
+            });
+        } /*else {
+            throw new Error(`Unexpected response status: ${response.status}`);
+        }*/
+    })
+    /*.then(response => {
+        if (response && response.status === 200) {
+            appendMessage(sender, messageText); // Append message in chat UI
+            messageInput.value = ''; // Clear input field
+            fetchChatHistory(sender, receiver); // Refresh chat history
+            alert(response.data.message);
+
+            // Emit 'success' event via WebSockets
+            socket.emit('success', { message: "Message added to existing chat." });
+
+        }
+    })*/
+    /*.catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send message. Please try again.');
+    });*/
+});
+
+
+                
+                
+                
+
+
+                //}
+                
+                    /*else{
+                    axios.post('http://localhost:4000/chat-add', {
+                sender: sender,
+                receiver: receiver,
+                messageText: messageText */
+            //)
+            /*.then(response => {
                 if (response.status === 200) {
                     appendMessage(sender, messageText); // Append message in chat
                     messageInput.value = ''; // Clear the input field
@@ -144,10 +184,10 @@
             .catch(error => {
                 console.error('Error sending message:', error);
                 alert('Failed to send message. Please try again.');
-            });
-                }
+            });*/
+                //}
 
-            })
+            //})
                 
 
             
@@ -169,7 +209,7 @@
                 console.error('Error sending message:', error);
                 alert('Failed to send message. Please try again.');
             });*/
-        });
+        //});
 
         // Fetch initial chat history when page loads
         if (username && contact) {
