@@ -9,226 +9,112 @@
 </head>
 <body>
     <div class="chat-container">
-        <!-- Sidebar for Profile and Contacts -->
         <div class="sidebar">
             <div class="profile-section">
                 <img src="profile-pic.jpg" alt="Profile Picture" class="profile-pic">
                 <h1>Welcome, <span id="username"></span>!</h1>
                 <p class="user-status">Online</p>
             </div>
-
             <div class="contacts-section">
                 <h3>Contacts</h3>
-                <ul id="contacts">
-                    <!-- Dynamic contact list will be populated here -->
-                </ul>
+                <ul id="contacts"></ul>
             </div>
         </div>
-
-        <!-- Chat Window -->
         <div class="chat-window">
             <div class="chat-header">
-                <h3 id="contact-id"> </h3>
+                <h3 id="contact-id"></h3>
             </div>
-
-            <div class="chat-messages" id="chat-messages">
-                <!-- Chat messages will be displayed here -->
-            </div>
-
+            <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input">
                 <input type="text" id="message-input" placeholder="Type your message...">
                 <button id="send-button">Send</button>
             </div>
         </div>
     </div>
-    
-
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-
     <script>
-
-        
-
-        // Get the query parameter for 'contact' and 'username'
         const queryParams = new URLSearchParams(window.location.search);
         const contact = queryParams.get('contact');
         const username = queryParams.get('username');
-
-        // Display the username or default to 'Guest'
         document.getElementById('username').textContent = username || 'Guest';
-        
-        // Display the contact name
-        document.getElementById('contact-id').textContent = contact ? `${contact}` : 'Error';
+        document.getElementById('contact-id').textContent = contact || 'Error';
 
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
 
-        // Function to append messages
-        function appendMessage(sender, message ,sender1) {
+        function appendMessage(sender, message, sender1) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender);
-            if(sender1 == undefined){
-                messageElement.textContent = message;
-            }else{
-                messageElement.textContent = sender1 + " : " + message;
-
-            }
-            
+            messageElement.textContent = sender1 ? `${sender1}: ${message}` : message;
             chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Function to fetch chat history
         function fetchChatHistory(sender, receiver) {
-    axios.post('http://localhost:4000/chat-history', {
-        sender, // Using function arguments
-        receiver
-    })
-        .then(response => {
-            if (response.status === 200) {
-                const messages = response.data.chat.messages; // Access the correct data field
-                chatMessages.innerHTML = ''; // Clear existing messages
-                messages.forEach(msg => appendMessage(sender, msg.messageText , msg.sender1)); //recived here
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching messages:', error);
-            alert('Failed to fetch messages. Please try again.');
-        });
-}
-
-
-        // Event listener for the send button
-        sendButton.addEventListener('click', () => {
-    const messageText = messageInput.value.trim(); // Trim to remove unnecessary spaces
-
-    if (messageText === '') {
-        alert('Please enter a message before sending!');
-        return;
-    }
-
-    const sender = username;  // Sender's username
-    const receiver = contact; // Receiver's username
-
-    // Verify if the receiver is active
-    axios.post('http://localhost:4000/verify_activeuser', { receiver })
-    .then(response => {
-        if (response.status === 200) {
-            // WebSockets will start from here ( !!! Working will start from here !!! )
-            const R_user = document.getElementById("contact-id").textContent;
-            socket.emit("message", { S_user: sender, R_user: receiver , messageText: messageText });//issue was not definig variables happened due to mismanagement of code
-            
-            // Append message immediately for active users
-            appendMessage(sender, messageText);
-            messageInput.value = ''; // Clear input field
-            fetchChatHistory(sender, receiver); // Refresh chat history
-
-            // Emit 'success' event via WebSockets
-            socket.emit('success', { message: "Message added to existing chat." });
-
-            return null; // Prevent further `.then()` execution
-
-        } /*else*/ 
-        if (response.status === 404) {
-            // If receiver is inactive, proceed with normal message storage
-            return axios.post('http://localhost:4000/chat-add', {
-                sender: sender,
-                receiver: receiver,
-                messageText: messageText
-            });
-        } /*else {
-            throw new Error(`Unexpected response status: ${response.status}`);
-        }*/
-    })
-    /*.then(response => {
-        if (response && response.status === 200) {
-            appendMessage(sender, messageText); // Append message in chat UI
-            messageInput.value = ''; // Clear input field
-            fetchChatHistory(sender, receiver); // Refresh chat history
-            alert(response.data.message);
-
-            // Emit 'success' event via WebSockets
-            socket.emit('success', { message: "Message added to existing chat." });
-
+            axios.post('http://localhost:4000/chat-history', { sender, receiver })
+                .then(response => {
+                    if (response.status === 200) {
+                        chatMessages.innerHTML = '';
+                        response.data.chat.messages.forEach(msg => appendMessage(sender, msg.messageText, msg.sender1));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching messages:', error);
+                    alert('Failed to fetch messages. Please try again.');
+                });
         }
-    })*/
-    /*.catch(error => {
-        console.error('Error:', error);
-        alert('Failed to send message. Please try again.');
-    });*/
-});
 
-
-                
-                
-                
-
-
-                //}
-                
-                    /*else{
-                    axios.post('http://localhost:4000/chat-add', {
-                sender: sender,
-                receiver: receiver,
-                messageText: messageText */
-            //)
-            /*.then(response => {
+        async function sendMessage(sender, receiver, messageText) {
+            try {
+                const response = await axios.post('http://localhost:4000/verify_activeuser', { receiver });
                 if (response.status === 200) {
-                    appendMessage(sender, messageText); // Append message in chat
-                    messageInput.value = ''; // Clear the input field
-                    fetchChatHistory(sender, receiver); // Refresh chat history
-                    alert(response.data.message);
+                    socket.emit("message", { S_user: sender, R_user: receiver, messageText });
+                    appendMessage(sender, messageText);
+                    messageInput.value = '';
+                    fetchChatHistory(sender, receiver);
+                    socket.emit('success', { message: "Message added to existing chat." });
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
-                alert('Failed to send message. Please try again.');
-            });*/
-                //}
-
-            //})
-                
-
-            
-            
-            /*axios.post('http://localhost:4000/chat-add', {
-                sender: sender,
-                receiver: receiver,
-                messageText: messageText
-            })
-            .then(response => {
-                if (response.status === 200) {
-                    appendMessage(sender, messageText); // Append message in chat
-                    messageInput.value = ''; // Clear the input field
-                    fetchChatHistory(sender, receiver); // Refresh chat history
-                    alert(response.data.message);
+            } catch (error) {
+                if (error.response && error.response.status === 404) {
+                    try {
+                        const chatResponse = await axios.post('http://localhost:4000/chat-add', { sender, receiver, messageText });
+                        if (chatResponse.status === 200) {
+                            appendMessage(sender, messageText);
+                            messageInput.value = '';
+                            fetchChatHistory(sender, receiver);
+                            socket.emit('success', { message: "Message added to existing chat." });
+                        }
+                    } catch (chatError) {
+                        console.error('Error adding message:', chatError);
+                        alert('Failed to send message. Please try again.');
+                    }
+                } else {
+                    console.error('Error verifying active user:', error);
+                    alert('Failed to check receiver status. Please try again.');
                 }
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
-                alert('Failed to send message. Please try again.');
-            });*/
-        //});
+            }
+        }
 
-        // Fetch initial chat history when page loads
-        if (username && contact) {
-            fetchChatHistory(username, contact);
-        } 
+        sendButton.addEventListener('click', () => {
+            const messageText = messageInput.value.trim();
+            if (!messageText) {
+                alert('Please enter a message before sending!');
+                return;
+            }
+            sendMessage(username, contact, messageText);
+        });
 
-        //websockets connection
+        //if (username && contact) {
+        fetchChatHistory(username, contact);
+        //}
 
         const socket = io("http://localhost:4000");
-        socket.on("connect", () => console.log("Server is connected"));
-        const S_user = document.getElementById("username").textContent;
-        socket.emit("AccountID" , S_user); //sending username id to server
-        console.log(S_user);
+        socket.on("connect", () => console.log("Connected to server"));
+        socket.emit("AccountID", username);
         socket.on("message", (message) => console.log(message));
-        socket.on("disconnect", () => {
-            socket.emit("Accountinfo", user);
-            console.log("Server Disconnected");
-        });
-                   
+        socket.on("disconnect", () => console.log("Disconnected from server"));
     </script>
 </body>
 </html>

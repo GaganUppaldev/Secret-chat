@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
                 const existingChat = await Message.findById(contact.chatid);
                 if (existingChat) {
                     console.log("chat is presnt pushing text")
-                    existingChat.content.push({ messageText, timestamp: new Date(), sender: S_user });
+                    existingChat.content.push({ messageText, timestamp: new Date(), sender: S_user , sender1: S_user});
                     await existingChat.save();
                     console.log('Message added to existing chat:', existingChat);
                     return socket.emit('success', { message: "Message added to existing chat." });
